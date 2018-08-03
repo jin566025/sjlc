@@ -113,7 +113,7 @@ export default {
 	onReachBottom() {
 	  this.pageNo = this.pageNo+1;
 	  if(this.pageNo>this.total){
-	  	this.loadingText="---------加载完毕---------"
+	  	this.loadingText="---加载完毕---"
 	  }else{
 	  	this.getList(this.pageNo,this.pageSize)
 	  }
@@ -124,7 +124,6 @@ export default {
       wx.navigateTo({ url })
     },
     getList:function(pageNo,pageSize){
-    	console.log("1111")
     	this.$ajax.post(this.$url+"/goodAll",{pageNo:pageNo,pageSize:pageSize}).then((res)=>{
     		if(res.data.code==0){
     			this.total = Math.ceil(res.data.total/this.pageSize);

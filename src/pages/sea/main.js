@@ -6,6 +6,7 @@ app.$mount()
 
 export default {
 	config: {
+		"enablePullDownRefresh": true,
 	    "navigationBarBackgroundColor": "#ffffff",
 	    "navigationBarTextStyle": "black",
 	    "navigationBarTitleText": "海淘",

@@ -1,13 +1,13 @@
 <template>
 	<div>
-		<!--<swiper class="swiper" indicator-dots="true" autoplay="true" interval="5000" duration="500">
-		    <block v-for="(item, index) in imgs" :index="index" :key="key">
+		<swiper class="swiper" indicator-dots="true" autoplay="true" interval="5000" duration="500">
+		    <block v-for="(item, index) in swiperImg" :index="index" :key="key">
 		        <swiper-item class="swiper-items">
 		            <image :src="item" class="slide-image slide-img" mode="aspectFit"/>
 		        </swiper-item>
 		    </block>
-		</swiper>-->
-		<swiper class="swiper" indicator-dots="true" autoplay="true" interval="5000" duration="500">
+		</swiper>
+		<!--<swiper class="swiper" indicator-dots="true" autoplay="true" interval="5000" duration="500">
 		    <block>
 		        <swiper-item class="swiper-items">
 		            <img src="../../../static/img/ht_good1.jpg" class="slide-image slide-img" mode="aspectFit" />
@@ -19,23 +19,24 @@
 		            <img src="../../../static/img/ht_good1.jpg" class="slide-image slide-img" mode="aspectFit" />
 		        </swiper-item>
 		    </block>
-		</swiper>
+		</swiper>-->
 		<div class="desc">
 			<div class="title clear">
-				<div class="title-left fl">SK-II 护肤精华露</div>
+				<div class="title-left fl">{{ title }}</div>
 				<div class="title-right fr">
 					<img class="love" src="../../../static/img/love-active.png" />
-					热度：288
+					热度：{{ hot }}
 				</div>
 			
 			</div>
 			
-			<div class="price">$  58 </div>
+			<div class="price">$  {{ price }} </div>
 			
-			<div class="content">SK-II始终坚持改写女性肌肤命运的品牌理念，自王牌成分PITERA诞生起，便以其为灵感研发而成了四大王牌产品，深受全球爱用者喜爱，帮助成就肌肤晶莹剔透。
-				<br/>深层清洁、保湿、补水、唇膜、防水、防脱、粉刺/抗痘、净化排毒、卷翘、抗菌消炎、抗敏感、抗衰老/抗皱 控油、美白、其他功效、祛斑、去黑眼圈、去屑、去眼袋、润唇膏、晒后修护、收缩毛孔、舒缓肌肤、锁色、提拉紧致、滋润
+			<div class="content">{{ content }}</div>
+			<div class="img-content">
+				<img v-for="item in detailImg" class="goods-img" mode="aspectFit" :src="item" />
 			</div>
-			<div class="add">加入心愿单</div>
+		<!--	<div class="add">加入心愿单</div>-->
 			<div class="tips">下单、咨询可戳下方小仙女</div>
 			<div class="tips">↓↓↓</div>
 			<img class="erweima" src="../../../static/img/erweima.jpg" mode="widthFix" @click="fangda" />
@@ -50,8 +51,21 @@
 	export default{
 		data(){
 			return {
-				imgs:["../../../static/img/ht_good1.jpg","../../../static/img/ht_good1.jpg","../../../static/img/ht_good1.jpg"]
+				imgs:["../../../static/img/ht_good1.jpg","../../../static/img/ht_good1.jpg","../../../static/img/ht_good1.jpg"],
+				id:'',
+				hot:'',
+				price:'',
+				title:'',
+				content:'',
+				swiperImg:[],
+				detailImg:[]
 			}
+		},
+		created(){
+			
+		},
+		onShow () {
+			this.load();
 		},
 		methods:{
 			fangda:function(){
@@ -62,6 +76,28 @@
 				  	console.log("aaa")
 				  }
 				})
+			},
+			load:function(){
+				var option=this.$root.$mp.query
+    			this.id = option.id
+    			let params={};
+    			params.id = option.id;
+    			this.$ajax.post(this.$url+"/seaById",params).then((res)=>{
+    				if(res.data.code==0){
+    					let datas = res.data.data[0];
+    					this.hot = datas.hot;
+    					this.price = datas.price;
+    					this.title = datas.title;
+    					this.content = datas.content;
+    				}
+    			})
+    			this.$ajax.post(this.$url+"/seaImgById",params).then((res)=>{
+    				if(res.data.code==0){
+    					let datas = res.data.data[0];
+    					this.swiperImg = datas.swiper_img.split("+++++++++");
+    					this.detailImg = datas.detail_img.split("+++++++++");
+    				}
+    			})
 			}
 		}
 	}
@@ -87,6 +123,9 @@
 		}
 	}
 	.price{font-size: 0.3rem;height: 1rem;line-height: 1rem;font-size: 0.4rem;font-weight: bold;}
+	.img-content{
+		.goods-img{width: 100%;margin-top: 0.4rem;}
+	}
 	.content{font-size: 0.24rem;line-height: 0.4rem;}
 	.tips{font-size: 0.3rem;height: 1rem;line-height: 1rem;margin-top: 0.1rem;text-align: center;}
 	.erweima{width:4rem;text-align: center;display: block;margin: 0.5rem auto;}

@@ -5,7 +5,7 @@
 			<div class="navs fl" v-for="(item,index) in navs" :class="{'navs-active': headerNav==index }" @click="tabNav(index)">{{ item }}</div>
 		</div>
 		<div class="container">
-			<div class="list clear" @click="toDetail()"> 
+			<!--<div class="list clear" @click="toDetail()"> 
 				<div class="img-container">
 					<img class="good-img" src="../../../static/img/ht_good1.jpg" mode="aspectFit" lazy-load="true" />
 				</div>
@@ -18,23 +18,25 @@
 						热度：288
 					</div>
 				</div>
-			</div>
+			</div>-->
 			
-			<div class="list clear">
+			<div class="list clear" v-for="(item,index) in lists"  @click="toDetail(item.id)">
 				<div class="img-container">
-					<img class="good-img" src="../../../static/img/ht_good1.jpg" mode="aspectFit" lazy-load="true" />
+					<img class="good-img" :src="item.imgs" mode="aspectFit" lazy-load="true" />
 				</div>
-				<div class="good-name">SK-II 护肤精华露</div>
-				<div class="good-desc">35 年来始终如一。备受瞩目、畅销全球的 SK-II 护肤精华露（神仙水®）蕴含超过90%的天然生物成分PITERA™，集维生素、矿物质和氨基酸等多种微量营养素于一身。SK-II 护肤精华露（神仙水®）改变你的肌肤，令肌肤变得晶莹剔透，嫩滑、紧致、焕发动人光彩。体验 PITERA™ 的魔力所在。</div>
+				<div class="good-name">{{ item.title }}</div>
+				<div class="good-desc">{{ item.content }}</div>
 				<div class="good-footer clear">
-					<div class="good-footer-left fl">59.00 $</div>
+					<div class="good-footer-left fl">{{ item.price }} $</div>
 					<div class="good-footer-right fr">
 						<img class="love" src="../../../static/img/love-active.png" />
-						热度：288
+						热度：{{ item.hot }}
 					</div>
 				</div>
 			</div>
 		</div>
+
+		<div class="loading">{{ loadingText }}</div>
 		<div class="zanwei"></div>
 	    <mfooter :nav-active="navactive"></mfooter>
     </div>
@@ -58,18 +60,68 @@
 			    indicatorDots: false,
 			    autoplay: false,
 			    interval: 5000,
-			    duration: 1000
-				
+			    duration: 1000,
+				lists:[],
+				pageNo:1,
+			    pageSize:5,
+			    total:0,
+			    loadingText:"加载中...",
+			    type:''
 			}
+		},
+		onReachBottom() {
+		  this.pageNo = this.pageNo+1;
+		  if(this.pageNo>this.total){
+		  	this.loadingText="---加载完毕---"
+		  }else{
+		  	this.getList(this.pageNo,this.pageSize,this.type)
+		  }
+		},
+		created(){
+			this.getList(this.pageNo,this.pageSize)
 		},
 		methods:{
 			tabNav:function(index){
 				this.headerNav=index;
+				this.type = index;
+				this.lists=[];
+				this.pageNo = 1;
+				this.loadingText = "加载中...";
+				if(index==0){
+					this.getList(this.pageNo,this.pageSize)
+				}else{
+					this.getList(this.pageNo,this.pageSize,this.type)
+				}
 			},
-			toDetail:function(){
+			toDetail:function(id){
 				wx.navigateTo({    
-			         url:"/pages/detail/main"
+			         url:"/pages/detail/main?id="+id
 			    })
+			},
+			getList:function(pageNo,pageSize,type){
+				let params = {};
+				params.pageNo = pageNo;
+				params.pageSize = pageSize;
+				if(type){
+					params.type = type;
+				}
+				this.$ajax.post(this.$url+"/seaAll",params).then((res)=>{
+					let datas = res.data.data;
+					if(res.data.code==0){
+						if(datas.length==0){
+							this.loadingText = "这个暂时没有~";
+						}else{
+							this.total = Math.ceil(res.data.total/this.pageSize);
+							if(this.lists.length==0){
+								this.lists = datas;
+							}else{
+								this.lists =this.lists.concat(datas);
+							}
+						}
+						
+					}
+					
+				})
 			}
 		},
 	    components: {
@@ -114,4 +166,5 @@
 		}
 	}
 }
+.loading{text-align: center;font-size: 12px;height: 30px;line-height: 30px;}
 </style>
